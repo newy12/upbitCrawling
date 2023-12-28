@@ -1,4 +1,5 @@
-package com.craw.crawlingprogram.crawCoinOne;
+package com.craw.crawlingprogram.crawKorbit;
+
 
 import com.craw.crawlingprogram.domain.CoinMarketType;
 import com.craw.crawlingprogram.domain.SaveDto;
@@ -13,17 +14,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class Coinone {
-
+public class Korbit {
     private final StakingInfoRepository stakingInfoRepository;
 
     public void craw() throws FileNotFoundException, InterruptedException {
         SaveDto saveDto = new SaveDto();
-        String url = "https://coinone.co.kr/plus";
+        //String url = "https://lightning.korbit.co.kr/service/staking/detail/26";
+        //String url = "https://lightning.korbit.co.kr/service/staking/detail/22";
+        //String url = "https://lightning.korbit.co.kr/service/staking/detail/23";
+        //String url = "https://lightning.korbit.co.kr/service/staking/detail/24";
+        //String url = "https://lightning.korbit.co.kr/service/staking/detail/21";
+        String url = "https://lightning.korbit.co.kr/service/staking/detail/25";
 
         //크롬드라이브 세팅
         System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
@@ -33,27 +39,19 @@ public class Coinone {
         //페이지 여는데 1초 텀 두기.
         Thread.sleep(1000);
 
+        List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
+        for (int i = 0; i < elements.size(); i++) {
+            saveDto.setCoinName(elements.get(0).getText());
+            saveDto.setAnnualRewardRate(elements.get(3).getText());
+            saveDto.setMinimumOrderQuantity(elements.get(5).getText());
+            saveDto.setStakingStatus(elements.get(7).getText());
+            saveDto.setCoinMarketType(CoinMarketType.korbit);
+        }
+        stakingInfoRepository.save(new StakingInfo(saveDto));
 
-        //각 요소 추출
-        List<WebElement> coinNames = webDriver.findElements(By.className("ProductsBrowseList_coin-name__bSWTj"));
-        List<WebElement> years = webDriver.findElements(By.className("ProductsBrowseList_column-reward__mKBuy"));
-
-        for (WebElement cointName: coinNames){
-            System.out.println("cointName = " + cointName.getText());
-        }
-        for (WebElement year : years){
-            System.out.println("year.getText() = " + year.getText());
-        }
-        for (int i = 0; i < coinNames.size(); i++) {
-            saveDto.setCoinName(coinNames.get(i).getText());
-            saveDto.setAnnualRewardRate(years.get(i).getText());
-            saveDto.setCoinMarketType(CoinMarketType.coinone);
-            stakingInfoRepository.save(new StakingInfo(saveDto));
-        }
         Thread.sleep(3000);
         //웹브라우저 닫기
         webDriver.close();
-
 
 
     }
