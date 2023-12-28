@@ -11,7 +11,7 @@ import java.io.IOException;
 public class CrawlingStarter {
 
     private final Upbit upbit;
-    @PostMapping("/craw")
+    @PostMapping("/craw-upbit")
     public void post() throws IOException, InterruptedException {
         upbit.craw();
     }
