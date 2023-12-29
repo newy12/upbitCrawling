@@ -6,10 +6,12 @@ import com.craw.crawlingprogram.domain.SaveDto;
 import com.craw.crawlingprogram.domain.StakingInfo;
 import com.craw.crawlingprogram.repository.StakingInfoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -19,6 +21,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class Korbit {
     private final StakingInfoRepository stakingInfoRepository;
 
@@ -32,9 +35,12 @@ public class Korbit {
         String url = "https://lightning.korbit.co.kr/service/staking/detail/25";
 
         //크롬드라이브 세팅
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
+
         //웹 주소 접속하여 페이지 열기
-        WebDriver webDriver = new ChromeDriver();
+        WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
         Thread.sleep(1000);
@@ -47,6 +53,7 @@ public class Korbit {
             saveDto.setStakingStatus(elements.get(7).getText());
             saveDto.setCoinMarketType(CoinMarketType.korbit);
         }
+        System.out.println("saveDto = " + saveDto);
         stakingInfoRepository.save(new StakingInfo(saveDto));
 
         Thread.sleep(3000);

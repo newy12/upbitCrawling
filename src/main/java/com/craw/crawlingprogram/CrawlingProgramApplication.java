@@ -1,19 +1,18 @@
 package com.craw.crawlingprogram;
 
-import com.craw.crawlingprogram.crawUpbit.Upbit;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-
-import java.io.IOException;
-
 @EnableJpaAuditing
 @SpringBootApplication
 public class CrawlingProgramApplication {
 
-    public static void main(String[] args){
-        SpringApplication.run(CrawlingProgramApplication.class, args);
+    public static final String APPLICATION_LOCATIONS = "spring.config.location="
+            + "optional:classpath:application-local.yml"
+            + ", optional:/app/project/config/application.yml";
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(CrawlingProgramApplication.class)
+                .properties(APPLICATION_LOCATIONS)
+                .run(args);
     }
-
 }
