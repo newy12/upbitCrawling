@@ -15,7 +15,7 @@ public class CrawlingStarter4 {
 
     @PostMapping("/craw-korbit")
     public void post() throws FileNotFoundException, InterruptedException {
-        korbit.craw();;
+        korbit.craw();
     }
 
 }

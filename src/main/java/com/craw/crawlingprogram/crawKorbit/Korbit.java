@@ -1,9 +1,9 @@
 package com.craw.crawlingprogram.crawKorbit;
 
 
-import com.craw.crawlingprogram.domain.CoinMarketType;
-import com.craw.crawlingprogram.domain.SaveDto;
-import com.craw.crawlingprogram.domain.StakingInfo;
+import com.craw.crawlingprogram.Entity.CoinMarketType;
+import com.craw.crawlingprogram.dto.SaveDto;
+import com.craw.crawlingprogram.Entity.StakingInfo;
 import com.craw.crawlingprogram.repository.StakingInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor

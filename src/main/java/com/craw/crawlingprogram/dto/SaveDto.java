@@ -1,0 +1,17 @@
+package com.craw.crawlingprogram.dto;
+
+
+import com.craw.crawlingprogram.Entity.CoinMarketType;
+import lombok.Data;
+
+@Data
+public class SaveDto {
+    private String coinName; //코인이름
+    private String annualRewardRate; //연 추정 보상률
+    private String stakingStatus; //스테이킹/언스테이킹 대기
+    private String rewardCycle; //보상주기
+    private String minimumOrderQuantity; // 최소신청수량
+    private String verificationFee; //검증인 수수료
+    private CoinMarketType coinMarketType; //코인거래소 종류
+
+}

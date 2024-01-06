@@ -12,3 +12,10 @@ spring:
           auto: update
         format_sql: true
         show_sql: true
+  data:
+    redis:
+      host: 158.179.163.36
+      port: 6379
+      password: back1234!@#$
+jwt:
+  secretKey: testKeyNameisExample2023

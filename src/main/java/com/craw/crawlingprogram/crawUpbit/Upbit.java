@@ -1,9 +1,9 @@
 package com.craw.crawlingprogram.crawUpbit;
 
 
-import com.craw.crawlingprogram.domain.CoinMarketType;
-import com.craw.crawlingprogram.domain.SaveDto;
-import com.craw.crawlingprogram.domain.StakingInfo;
+import com.craw.crawlingprogram.Entity.CoinMarketType;
+import com.craw.crawlingprogram.dto.SaveDto;
+import com.craw.crawlingprogram.Entity.StakingInfo;
 import com.craw.crawlingprogram.repository.StakingInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
@@ -74,42 +74,26 @@ public class Upbit {
                 Thread.sleep(2000);
                 //보상률 정보
                 WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                System.out.println("rewardRate = " + rewardRateInfo.getText());
-                saveDto.setRewardRateForThreeMonth(rewardRateInfo.getText());
-                System.out.println("childIndex 0= " + child.getText());
                 WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-                saveDto.setRewardRateTrendForThreeMonth(button.getAttribute("d"));
             }
             if(childIndex == 1){
                 child.click();
                 Thread.sleep(2000);
                 WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                System.out.println("rewardRate = " + rewardRateInfo.getText());
-                saveDto.setRewardRateForSixMonth(rewardRateInfo.getText());
-                System.out.println("childIndex 1= " + child.getText());
                 WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-                saveDto.setRewardRateTrendForSixMonth(button.getAttribute("d"));
 
             }
             if(childIndex == 2){
                 child.click();
                 Thread.sleep(2000);
                 WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                System.out.println("rewardRate = " + rewardRateInfo.getText());
-                saveDto.setRewardRateForOneYear(rewardRateInfo.getText());
-                System.out.println("childIndex 1= " + child.getText());
                 WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-                saveDto.setRewardRateTrendForOneYear(button.getAttribute("d"));
             }
             if(childIndex == 3){
                 child.click();
                 Thread.sleep(2000);
                 WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                System.out.println("rewardRate = " + rewardRateInfo.getText());
-                saveDto.setRewardRateForThreeYear(rewardRateInfo.getText());
-                System.out.println("childIndex 1= " + child.getText());
                 WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-                saveDto.setRewardRateTrendForThreeYear(button.getAttribute("d"));
             }
             childIndex++;
         }
