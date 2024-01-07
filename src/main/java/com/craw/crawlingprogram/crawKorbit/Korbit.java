@@ -26,39 +26,44 @@ public class Korbit {
 
     public void craw() throws FileNotFoundException, InterruptedException {
         SaveDto saveDto = new SaveDto();
-        //String url = "https://lightning.korbit.co.kr/service/staking/detail/26";
-        //String url = "https://lightning.korbit.co.kr/service/staking/detail/22";
-        //String url = "https://lightning.korbit.co.kr/service/staking/detail/23";
-        //String url = "https://lightning.korbit.co.kr/service/staking/detail/24";
-        //String url = "https://lightning.korbit.co.kr/service/staking/detail/21";
-        String url = "https://lightning.korbit.co.kr/service/staking/detail/25";
+        String url = "https://lightning.korbit.co.kr/service/staking/list";
 
         //크롬드라이브 세팅
         System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
+        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
 
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
-        List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
-        for (int i = 0; i < elements.size(); i++) {
-            saveDto.setCoinName(elements.get(0).getText());
-            saveDto.setAnnualRewardRate(elements.get(3).getText());
-            saveDto.setMinimumOrderQuantity(elements.get(5).getText());
-            saveDto.setStakingStatus(elements.get(7).getText());
-            saveDto.setCoinMarketType(CoinMarketType.korbit);
+        List<WebElement> clicks = webDriver.findElements(By.className("gaBYEM"));
+        for (int i = 0; i < clicks.size(); i++) {
+            List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
+            clickList.get(i).click();
+            Thread.sleep(2000);
+
+            List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
+            for (int j = 0; j < elements.size(); j++) {
+                saveDto.setCoinName(elements.get(0).getText());
+                saveDto.setAnnualRewardRate(elements.get(3).getText());
+                saveDto.setMinimumOrderQuantity(elements.get(5).getText());
+                saveDto.setStakingStatus(elements.get(7).getText());
+                saveDto.setCoinMarketType(CoinMarketType.korbit);
+            }
+            System.out.println("saveDto = " + saveDto);
+            //stakingInfoRepository.save(new StakingInfo(saveDto));
+
+            Thread.sleep(3000);
+
+            webDriver.get(url);
+            Thread.sleep(2000);
+
         }
-        System.out.println("saveDto = " + saveDto);
-        stakingInfoRepository.save(new StakingInfo(saveDto));
-
-        Thread.sleep(3000);
         //웹브라우저 닫기
         webDriver.close();
-
-
     }
 }

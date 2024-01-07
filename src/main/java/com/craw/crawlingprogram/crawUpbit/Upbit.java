@@ -29,11 +29,11 @@ public class Upbit {
         //크롤링할 주소
         String url = "https://upbit.com/staking/items";
         //크롬드라이브 세팅
-        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
         //배포할때 주석풀기.
-        //options.addArguments("headless");
+        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
@@ -93,8 +93,7 @@ public class Upbit {
             Thread.sleep(3000);
 
             //스테이킹 목록으로 다시들어가기
-            WebElement returnList = webDriver.findElement(By.className("css-13fc028"));
-            returnList.click();
+            webDriver.get(url);
             Thread.sleep(3000);
         }
         //웹브라우저 닫기
