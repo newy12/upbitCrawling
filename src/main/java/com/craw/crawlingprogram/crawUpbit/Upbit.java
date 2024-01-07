@@ -16,6 +16,8 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Service
@@ -24,104 +26,95 @@ public class Upbit {
 
     public  void craw() throws IOException, InterruptedException {
         SaveDto saveDto = new SaveDto();
-
         //크롤링할 주소
-        //String url = "https://upbit.com/staking/detail/ETH-SETH";
-        //String url = "https://upbit.com/staking/detail/ATOM-SATOM";
-        //String url = "https://upbit.com/staking/detail/ADA-SADA";
-        //String url = "https://upbit.com/staking/detail/SOL-SSOL";
-        String url = "https://upbit.com/staking/detail/MATIC-SMATIC";
+        String url = "https://upbit.com/staking/items";
         //크롬드라이브 세팅
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
+        //배포할때 주석풀기.
+        //options.addArguments("headless");
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
         Thread.sleep(1000);
 
-        //코인이름
-        WebElement coinName = webDriver.findElement(By.className("ListDetailView__condition__title__text"));
-        System.out.println("coinTitle = " + coinName.getText());
-        saveDto.setCoinName(coinName.getText());
+        List<WebElement> addTexts = webDriver.findElements(By.className("css-1j71w0l"));
+        for (int i =0; i<addTexts.size(); i++) {
+            List<WebElement> addTextList = webDriver.findElements(By.className("css-1j71w0l"));
+            System.out.println("addTexts = " + addTextList);
+            addTextList.get(i).click();
+            Thread.sleep(3000);
+            //코인이름
+            WebElement coinName = webDriver.findElement(By.className("ListDetailView__condition__title__text"));
+            saveDto.setCoinName(removeNonKorean(coinName.getText()));
 
-        //연 추정 보상률, 스테이킹/언스테이킹 대기, 보상주기
-        List<WebElement> values = webDriver.findElements(By.className("infoItem__value"));
-        int valueIndex = 0;
-        for (WebElement value : values) {
-            if(valueIndex == 0){
-                System.out.println("index 0= " + value.getText());
-                saveDto.setAnnualRewardRate(value.getText());
+            //연 추정 보상률, 스테이킹/언스테이킹 대기, 보상주기
+            List<WebElement> values = webDriver.findElements(By.className("infoItem__value"));
+            int valueIndex = 0;
+            for (WebElement value : values) {
+                if(valueIndex == 0){
+                    System.out.println("index 0= " + value.getText());
+                    saveDto.setAnnualRewardRate(value.getText());
+                }
+                if(valueIndex == 1){
+                    System.out.println("index 1 = " + value.getText());
+                    saveDto.setStakingStatus(value.getText());
+                }
+                if(valueIndex == 2){
+                    System.out.println("index 2 = " + value.getText());
+                    saveDto.setRewardCycle(value.getText());
+                }
+                valueIndex++;
             }
-            if(valueIndex == 1){
-                System.out.println("index 1 = " + value.getText());
-                saveDto.setStakingStatus(value.getText());
+
+            System.out.println("upbitSaveDto = " + saveDto);
+
+            //최소신청수량, 검증인 수수료
+            List<WebElement> values2 = webDriver.findElements(By.className("conditionInfo__data__value--Num"));
+            int miniAndFeeIndex = 0;
+            for (WebElement value:values2){
+                if(miniAndFeeIndex == 0){
+                    saveDto.setMinimumOrderQuantity(value.getText());
+                    System.out.println("value = " + value.getText());
+                }
+                if(miniAndFeeIndex == 1){
+                    saveDto.setVerificationFee(value.getText());
+                    System.out.println("value = " + value.getText());
+                }
+                miniAndFeeIndex++;
             }
-            if(valueIndex == 2){
-                System.out.println("index 2 = " + value.getText());
-                saveDto.setRewardCycle(value.getText());
-            }
-            valueIndex++;
+            //거래소 저장
+            saveDto.setCoinMarketType(CoinMarketType.upbit);
+            //upbitStakingInfoRepository.save(new StakingInfo(saveDto));
+            System.out.println("result !!!!!!!!!!!!!" + saveDto);
+
+            Thread.sleep(3000);
+
+            //스테이킹 목록으로 다시들어가기
+            WebElement returnList = webDriver.findElement(By.className("css-13fc028"));
+            returnList.click();
+            Thread.sleep(3000);
         }
-        //보상률 변동 추세
-        WebElement rewardRateGraphParent = webDriver.findElement(By.className("css-y4qzle"));
-        List<WebElement> rewardRateGraphChildren = rewardRateGraphParent.findElements(By.className("css-1s1bpji"));
-        int childIndex = 0;
-        for (WebElement child : rewardRateGraphChildren) {
-            if(childIndex == 0){
-                child.click();
-                Thread.sleep(2000);
-                //보상률 정보
-                WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-            }
-            if(childIndex == 1){
-                child.click();
-                Thread.sleep(2000);
-                WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-
-            }
-            if(childIndex == 2){
-                child.click();
-                Thread.sleep(2000);
-                WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-            }
-            if(childIndex == 3){
-                child.click();
-                Thread.sleep(2000);
-                WebElement rewardRateInfo = webDriver.findElement(By.className("css-4yiwd3"));
-                WebElement button = webDriver.findElement(By.className("highcharts-tracker-line"));
-            }
-            childIndex++;
-        }
-        System.out.println("upbitSaveDto = " + saveDto);
-
-        //최소신청수량, 검증인 수수료
-        List<WebElement> values2 = webDriver.findElements(By.className("conditionInfo__data__value--Num"));
-        int miniAndFeeIndex = 0;
-        for (WebElement value:values2){
-            if(miniAndFeeIndex == 0){
-                saveDto.setMinimumOrderQuantity(value.getText());
-                System.out.println("value = " + value.getText());
-            }
-            if(miniAndFeeIndex == 1){
-                saveDto.setVerificationFee(value.getText());
-                System.out.println("value = " + value.getText());
-            }
-            miniAndFeeIndex++;
-        }
-        //거래소 저장
-        saveDto.setCoinMarketType(CoinMarketType.upbit);
-        upbitStakingInfoRepository.save(new StakingInfo(saveDto));
-
-        Thread.sleep(3000);
         //웹브라우저 닫기
         webDriver.close();
-    }
 
+        }
+    public static String removeNonKorean(String input) {
+        // 정규표현식을 사용하여 한글을 제외한 모든 문자를 제거
+        String regex = "[가-힣]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // 매칭된 부분을 제외한 나머지 부분을 합침
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            result.append(matcher.group());
+        }
+
+        return result.toString();
+    }
 
 }
 
