@@ -43,7 +43,7 @@ public class Upbit {
         List<WebElement> addTexts = webDriver.findElements(By.className("css-1j71w0l"));
         for (int i =0; i<addTexts.size(); i++) {
             List<WebElement> addTextList = webDriver.findElements(By.className("css-1j71w0l"));
-            System.out.println("addTexts = " + addTextList);
+            System.out.println("addTexts = " + addTextList.size());
             addTextList.get(i).click();
             Thread.sleep(3000);
             //코인이름
@@ -55,15 +55,12 @@ public class Upbit {
             int valueIndex = 0;
             for (WebElement value : values) {
                 if(valueIndex == 0){
-                    System.out.println("index 0= " + value.getText());
                     saveDto.setAnnualRewardRate(value.getText());
                 }
                 if(valueIndex == 1){
-                    System.out.println("index 1 = " + value.getText());
                     saveDto.setStakingStatus(value.getText());
                 }
                 if(valueIndex == 2){
-                    System.out.println("index 2 = " + value.getText());
                     saveDto.setRewardCycle(value.getText());
                 }
                 valueIndex++;
@@ -77,18 +74,16 @@ public class Upbit {
             for (WebElement value:values2){
                 if(miniAndFeeIndex == 0){
                     saveDto.setMinimumOrderQuantity(value.getText());
-                    System.out.println("value = " + value.getText());
                 }
                 if(miniAndFeeIndex == 1){
                     saveDto.setVerificationFee(value.getText());
-                    System.out.println("value = " + value.getText());
                 }
                 miniAndFeeIndex++;
             }
             //거래소 저장
             saveDto.setCoinMarketType(CoinMarketType.upbit);
             //upbitStakingInfoRepository.save(new StakingInfo(saveDto));
-            System.out.println("result !!!!!!!!!!!!!" + saveDto);
+            System.out.println("saveDto :::::" + saveDto);
 
             Thread.sleep(3000);
 
