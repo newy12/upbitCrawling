@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public class Korbit {
     private final StakingInfoRepository stakingInfoRepository;
 
-    public static String korbitApi(int i,String market) {
+    public static String korbitApi(String market) {
 
 
         RestTemplate restTemplate = new RestTemplate();
@@ -65,7 +65,7 @@ public class Korbit {
             List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
             clickList.get(i).click();
             Thread.sleep(2000);
-            saveDto.setPrevClosingPrice(korbitApi(i,market.toLowerCase(Locale.ROOT)));
+            saveDto.setPrevClosingPrice(korbitApi(market.toLowerCase(Locale.ROOT)));
             Thread.sleep(5000);
             List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
             

@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class Upbit {
     private final StakingInfoRepository stakingInfoRepository;
 
-    public static String upbitApi(int i,String market) {
+    public static String upbitApi(String market) {
 
 
         //upbit api 요청으로 전일종가 추출
@@ -70,7 +70,7 @@ public class Upbit {
             saveDto.setCoinName(removeNonKorean(coinName.getText()));
 
             //코인전날 종가 api로 받기
-            saveDto.setPrevClosingPrice(upbitApi(i,market));
+            saveDto.setPrevClosingPrice(upbitApi(market));
             Thread.sleep(5000);
 
             //연 추정 보상률, 스테이킹/언스테이킹 대기, 보상주기
