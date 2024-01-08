@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,26 +29,12 @@ import java.util.regex.Pattern;
 public class Korbit {
     private final StakingInfoRepository stakingInfoRepository;
 
-    public static String korbitApi(int i) {
-        //이더리움
-        String eth = "eth_krw";
-        //카르다노
-        String ada = "ada_krw";
-        //솔라나
-        String sol = "sol_krw";
-        //폴카닷
-        String dot = "dot_krw";
-        //테조스
-        String xtz = "xtz_krw";
-        //쿠사마
-        String ksm = "ksm_krw";
+    public static String korbitApi(int i,String market) {
 
-        String[] markets = {eth,ada,sol,dot,xtz,ksm};
-        //upbit api 요청으로 전일종가 추출
 
         RestTemplate restTemplate = new RestTemplate();
 
-        KorbitResponseDto response = restTemplate.getForObject("https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=" + markets[i], KorbitResponseDto.class);
+        KorbitResponseDto response = restTemplate.getForObject("https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=" + market + "_krw", KorbitResponseDto.class);
         return response.getLast();
     }
 
@@ -72,11 +59,14 @@ public class Korbit {
         List<WebElement> clicks = webDriver.findElements(By.className("gaBYEM"));
         System.out.println("clicks.size() = " + clicks.size());
         for (int i = 0; i < clicks.size(); i++) {
+            List<WebElement> h3Element = webDriver.findElements(By.cssSelector(".sc-1z0oddf-0.ffIHDz h3"));
+            String market = h3Element.get(i).getText().substring(h3Element.get(i).getText().indexOf("(") + 1, h3Element.get(i).getText().indexOf(")")).trim();
+            System.out.println("market = " + market);
             List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
             clickList.get(i).click();
             Thread.sleep(2000);
-            saveDto.setPrevClosingPrice(korbitApi(i));
-            Thread.sleep(20000);
+            saveDto.setPrevClosingPrice(korbitApi(i,market.toLowerCase(Locale.ROOT)));
+            Thread.sleep(5000);
             List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
             
             for (int j = 0; j < elements.size(); j++) {
@@ -87,7 +77,7 @@ public class Korbit {
                 saveDto.setCoinMarketType(CoinMarketType.korbit);
             }
             System.out.println("saveDto = " + saveDto);
-            stakingInfoRepository.save(new StakingInfo(saveDto));
+            //stakingInfoRepository.save(new StakingInfo(saveDto));
 
             Thread.sleep(3000);
 
