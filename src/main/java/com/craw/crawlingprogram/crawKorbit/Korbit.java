@@ -2,6 +2,7 @@ package com.craw.crawlingprogram.crawKorbit;
 
 
 import com.craw.crawlingprogram.Entity.CoinMarketType;
+import com.craw.crawlingprogram.crawUpbit.UpbitResponseDto;
 import com.craw.crawlingprogram.dto.SaveDto;
 import com.craw.crawlingprogram.Entity.StakingInfo;
 import com.craw.crawlingprogram.repository.StakingInfoRepository;
@@ -14,9 +15,12 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Service
@@ -24,15 +28,40 @@ import java.util.List;
 public class Korbit {
     private final StakingInfoRepository stakingInfoRepository;
 
+    public static String korbitApi(int i) {
+        //이더리움
+        String eth = "eth_krw";
+        //카르다노
+        String ada = "ada_krw";
+        //솔라나
+        String sol = "sol_krw";
+        //폴카닷
+        String dot = "dot_krw";
+        //테조스
+        String xtz = "xtz_krw";
+        //쿠사마
+        String ksm = "ksm_krw";
+
+        String[] markets = {eth,ada,sol,dot,xtz,ksm};
+        //upbit api 요청으로 전일종가 추출
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        KorbitResponseDto response = restTemplate.getForObject("https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=" + markets[i], KorbitResponseDto.class);
+        return response.getLast();
+    }
+
+
+
     public void craw() throws FileNotFoundException, InterruptedException {
         SaveDto saveDto = new SaveDto();
         String url = "https://lightning.korbit.co.kr/service/staking/list";
 
         //크롬드라이브 세팅
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
-        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
+        //options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
 
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
@@ -41,21 +70,24 @@ public class Korbit {
         Thread.sleep(2000);
 
         List<WebElement> clicks = webDriver.findElements(By.className("gaBYEM"));
+        System.out.println("clicks.size() = " + clicks.size());
         for (int i = 0; i < clicks.size(); i++) {
             List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
             clickList.get(i).click();
             Thread.sleep(2000);
-
+            saveDto.setPrevClosingPrice(korbitApi(i));
+            Thread.sleep(20000);
             List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
+            
             for (int j = 0; j < elements.size(); j++) {
-                saveDto.setCoinName(elements.get(0).getText());
-                saveDto.setAnnualRewardRate(elements.get(3).getText());
+                saveDto.setCoinName(removeNonKorean(elements.get(0).getText()));
+                saveDto.setMaxAnnualRewardRate(extractNumber(elements.get(3).getText()) + "%");
                 saveDto.setMinimumOrderQuantity(elements.get(5).getText());
                 saveDto.setStakingStatus(elements.get(7).getText());
                 saveDto.setCoinMarketType(CoinMarketType.korbit);
             }
             System.out.println("saveDto = " + saveDto);
-            //stakingInfoRepository.save(new StakingInfo(saveDto));
+            stakingInfoRepository.save(new StakingInfo(saveDto));
 
             Thread.sleep(3000);
 
@@ -65,5 +97,34 @@ public class Korbit {
         }
         //웹브라우저 닫기
         webDriver.close();
+    }
+    private static String extractNumber(String input) {
+        // 숫자와 소수점을 포함하는 정규표현식
+        String regex = "[0-9.]+";
+
+        // 정규표현식에 매칭되는 부분 추출
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // 매칭된 부분이 있다면 반환
+        if (matcher.find()) {
+            return matcher.group();
+        } else {
+            return null; // 매칭된 부분이 없으면 null 반환 또는 원하는 방식으로 처리
+        }
+    }
+    public static String removeNonKorean(String input) {
+        // 정규표현식을 사용하여 한글을 제외한 모든 문자를 제거
+        String regex = "[가-힣]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // 매칭된 부분을 제외한 나머지 부분을 합침
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            result.append(matcher.group());
+        }
+
+        return result.toString();
     }
 }

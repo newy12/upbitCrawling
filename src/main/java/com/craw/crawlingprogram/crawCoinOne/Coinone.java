@@ -27,31 +27,28 @@ public class Coinone {
         String url = "https://coinone.co.kr/plus";
 
         //크롬드라이브 세팅
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
+        //배포할때 주석풀기.
+        //options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
 
         //각 요소 추출
         List<WebElement> coinNames = webDriver.findElements(By.className("ProductsBrowseList_coin-name__bSWTj"));
         List<WebElement> years = webDriver.findElements(By.className("ProductsBrowseList_column-reward__mKBuy"));
 
-        for (WebElement cointName: coinNames){
-            System.out.println("cointName = " + cointName.getText());
-        }
-        for (WebElement year : years){
-            System.out.println("year.getText() = " + year.getText());
-        }
         for (int i = 0; i < coinNames.size(); i++) {
             saveDto.setCoinName(coinNames.get(i).getText());
-            saveDto.setAnnualRewardRate(years.get(i).getText());
+            saveDto.setMaxAnnualRewardRate(years.get(i).getText());
             saveDto.setCoinMarketType(CoinMarketType.coinone);
             stakingInfoRepository.save(new StakingInfo(saveDto));
+            System.out.println("saveDto = " + saveDto);
         }
         Thread.sleep(3000);
         //웹브라우저 닫기

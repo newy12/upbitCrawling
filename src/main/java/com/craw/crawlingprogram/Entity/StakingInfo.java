@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -21,10 +22,11 @@ public class StakingInfo extends BaseTime implements Serializable {
     @Column(columnDefinition = "BINARY(16)")
     private UUID stakingId;
     private String coinName; //코인이름
-    private String annualRewardRate; //연 추정 보상률
+    private String  prevClosingPrice; //전일종가
+    private String minAnnualRewardRate;
+    private String maxAnnualRewardRate;
     private String stakingStatus; //스테이킹/언스테이킹 대기
     private String rewardCycle; //보상주기
-
     private String minimumOrderQuantity; // 최소신청수량
     private String verificationFee; //검증인 수수료
     @Enumerated(EnumType.STRING)
@@ -32,7 +34,9 @@ public class StakingInfo extends BaseTime implements Serializable {
 
     public StakingInfo(SaveDto saveDto){
         this.coinName = saveDto.getCoinName();
-        this.annualRewardRate = saveDto.getAnnualRewardRate();
+        this.prevClosingPrice = saveDto.getPrevClosingPrice();
+        this.minAnnualRewardRate = saveDto.getMinAnnualRewardRate();
+        this.maxAnnualRewardRate = saveDto.getMaxAnnualRewardRate();
         this.stakingStatus = saveDto.getStakingStatus();
         this.rewardCycle = saveDto.getRewardCycle();
         this.minimumOrderQuantity = saveDto.getMinimumOrderQuantity();

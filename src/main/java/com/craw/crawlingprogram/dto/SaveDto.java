@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 public class SaveDto {
     private String coinName; //코인이름
-    private String annualRewardRate; //연 추정 보상률
+    private String prevClosingPrice; //전일 종가
+    private String minAnnualRewardRate; //연 추정 보상률 (최소)
+    private String maxAnnualRewardRate; //연 추정 보상률 (최대)
     private String stakingStatus; //스테이킹/언스테이킹 대기
     private String rewardCycle; //보상주기
     private String minimumOrderQuantity; // 최소신청수량
