@@ -28,24 +28,14 @@ import java.util.regex.Pattern;
 public class Upbit {
     private final StakingInfoRepository stakingInfoRepository;
 
-    public static String upbitApi(int i) {
-        //이더리움
-        String eth = "KRW-ETH";
-        //코스모스
-        String atom = "KRW-ATOM";
-        //에이다
-        String ada = "KRW-ADA";
-        //솔라나
-        String sol = "KRW-SOL";
-        //폴리곤
-        String matic = "KRW-MATIC";
+    public static String upbitApi(int i,String market) {
 
-        String[] markets = {eth, atom, ada, sol, matic};
+
         //upbit api 요청으로 전일종가 추출
 
             RestTemplate restTemplate = new RestTemplate();
 
-            UpbitResponseDto[] response = restTemplate.getForObject("https://api.upbit.com/v1/ticker?markets=" + markets[i], UpbitResponseDto[].class);
+            UpbitResponseDto[] response = restTemplate.getForObject("https://api.upbit.com/v1/ticker?markets=KRW-" + market, UpbitResponseDto[].class);
             return String.valueOf(response[0].getPrev_closing_price());
     }
 
@@ -64,7 +54,7 @@ public class Upbit {
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(5000);
+        Thread.sleep(1000);
 
         List<WebElement> addTexts = webDriver.findElements(By.className("css-1j71w0l"));
         System.out.println("addTexts.size() = " + addTexts.size());
@@ -72,14 +62,16 @@ public class Upbit {
             List<WebElement> addTextList = webDriver.findElements(By.className("css-1j71w0l"));
             System.out.println("addTextList = " + addTextList.size());
             addTextList.get(i).click();
-            Thread.sleep(7000);
+            Thread.sleep(3000);
             //코인이름
             WebElement coinName = webDriver.findElement(By.className("ListDetailView__condition__title__text"));
+            String market = coinName.getText().substring(coinName.getText().indexOf("(") + 1, coinName.getText().indexOf(")")).trim();
+            System.out.println("market = " + market);
             saveDto.setCoinName(removeNonKorean(coinName.getText()));
 
             //코인전날 종가 api로 받기
-            saveDto.setPrevClosingPrice(upbitApi(i));
-            Thread.sleep(10000);
+            saveDto.setPrevClosingPrice(upbitApi(i,market));
+            Thread.sleep(5000);
 
             //연 추정 보상률, 스테이킹/언스테이킹 대기, 보상주기
             List<WebElement> values = webDriver.findElements(By.className("infoItem__value"));
@@ -112,14 +104,14 @@ public class Upbit {
             }
             //거래소 저장
             saveDto.setCoinMarketType(CoinMarketType.upbit);
-            stakingInfoRepository.save(new StakingInfo(saveDto));
+            //stakingInfoRepository.save(new StakingInfo(saveDto));
             System.out.println("saveDto :::::" + saveDto);
 
-            Thread.sleep(6000);
+            Thread.sleep(3000);
 
             //스테이킹 목록으로 다시들어가기
             webDriver.get(url);
-            Thread.sleep(6000);
+            Thread.sleep(3000);
         }
         //웹브라우저 닫기
         webDriver.close();
