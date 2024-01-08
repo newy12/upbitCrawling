@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +27,7 @@ public class Bithumb {
 
     private final StakingInfoRepository stakingInfoRepository;
 
+
     public static String BithumbApi(String market) {
 
         //upbit api 요청으로 전일종가 추출
@@ -35,22 +37,22 @@ public class Bithumb {
         System.out.println("response = " + response);
         return response.getData().getClosing_price();
     }
-
+    @Scheduled(cron = "0 0 2 * * *")
     public void craw() throws FileNotFoundException, InterruptedException {
         SaveDto saveDto = new SaveDto();
         String url = "https://www.bithumb.com/staking/goods";
 
         //크롬드라이브 세팅
-        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
         //배포할때 주석풀기.
-        //options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
+        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(1000);
+        Thread.sleep(8000);
 
 
         //더보기 버튼 클릭
@@ -67,18 +69,18 @@ public class Bithumb {
         for (int i = 0; i < coinName.size(); i++) {
             System.out.println("value = " + extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText()));
             saveDto.setPrevClosingPrice(BithumbApi(extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText())));
-            Thread.sleep(3000);
+            Thread.sleep(8000);
             saveDto.setCoinName(coinName.get(i).getText());
             String[] values = extractNumbers(years.get(i).getText());
             saveDto.setMinAnnualRewardRate(values[0]);
             saveDto.setMaxAnnualRewardRate(values[1]);
             saveDto.setMinimumOrderQuantity(numbers.get(i).getText() + unit.get(i).getText());
             saveDto.setCoinMarketType(CoinMarketType.bithumb);
-            //stakingInfoRepository.save(new StakingInfo(saveDto));
+            stakingInfoRepository.save(new StakingInfo(saveDto));
             System.out.println("saveDto = " + saveDto);
         }
 
-        Thread.sleep(3000);
+        Thread.sleep(8000);
         //웹브라우저 닫기
         webDriver.close();
     }

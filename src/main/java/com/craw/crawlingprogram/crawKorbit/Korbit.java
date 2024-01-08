@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
@@ -39,22 +40,22 @@ public class Korbit {
     }
 
 
-
+    @Scheduled(cron = "0 0 1 * * *")
     public void craw() throws FileNotFoundException, InterruptedException {
         SaveDto saveDto = new SaveDto();
         String url = "https://lightning.korbit.co.kr/service/staking/list";
 
         //크롬드라이브 세팅
-        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
-        //options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
+        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
 
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(2000);
+        Thread.sleep(8000);
 
         List<WebElement> clicks = webDriver.findElements(By.className("gaBYEM"));
         System.out.println("clicks.size() = " + clicks.size());
@@ -64,9 +65,9 @@ public class Korbit {
             System.out.println("market = " + market);
             List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
             clickList.get(i).click();
-            Thread.sleep(2000);
+            Thread.sleep(8000);
             saveDto.setPrevClosingPrice(korbitApi(market.toLowerCase(Locale.ROOT)));
-            Thread.sleep(5000);
+            Thread.sleep(15000);
             List<WebElement> elements = webDriver.findElements(By.cssSelector("div.sc-1ro7n4j-0 span"));
             
             for (int j = 0; j < elements.size(); j++) {
@@ -77,12 +78,12 @@ public class Korbit {
                 saveDto.setCoinMarketType(CoinMarketType.korbit);
             }
             System.out.println("saveDto = " + saveDto);
-            //stakingInfoRepository.save(new StakingInfo(saveDto));
+            stakingInfoRepository.save(new StakingInfo(saveDto));
 
-            Thread.sleep(3000);
+            Thread.sleep(8000);
 
             webDriver.get(url);
-            Thread.sleep(2000);
+            Thread.sleep(8000);
 
         }
         //웹브라우저 닫기

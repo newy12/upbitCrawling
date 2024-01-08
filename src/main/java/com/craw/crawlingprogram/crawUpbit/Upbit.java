@@ -12,6 +12,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
@@ -38,23 +39,23 @@ public class Upbit {
             UpbitResponseDto[] response = restTemplate.getForObject("https://api.upbit.com/v1/ticker?markets=KRW-" + market, UpbitResponseDto[].class);
             return String.valueOf(response[0].getPrev_closing_price());
     }
-
+    @Scheduled(cron = "0 30 0 * * *")
     public void craw() throws IOException, InterruptedException {
         SaveDto saveDto = new SaveDto();
 
         //크롤링할 주소
         String url = "https://upbit.com/staking/items";
         //크롬드라이브 세팅
-        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
-        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
+        System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("/app/project/chromedriver-linux64/chromedriver")));
+        //System.setProperty("webdriver.chrome.driver", String.valueOf(ResourceUtils.getFile("classpath:static/chromedriver")));
         ChromeOptions options = new ChromeOptions();
         //배포할때 주석풀기.
-        //options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
+        options.addArguments("headless","no-sandbox","disable-dev-shm-usage");
         //웹 주소 접속하여 페이지 열기
         WebDriver webDriver = new ChromeDriver(options);
         webDriver.get(url);
         //페이지 여는데 1초 텀 두기.
-        Thread.sleep(1000);
+        Thread.sleep(8000);
 
         List<WebElement> addTexts = webDriver.findElements(By.className("css-1j71w0l"));
         System.out.println("addTexts.size() = " + addTexts.size());
@@ -62,7 +63,7 @@ public class Upbit {
             List<WebElement> addTextList = webDriver.findElements(By.className("css-1j71w0l"));
             System.out.println("addTextList = " + addTextList.size());
             addTextList.get(i).click();
-            Thread.sleep(3000);
+            Thread.sleep(8000);
             //코인이름
             WebElement coinName = webDriver.findElement(By.className("ListDetailView__condition__title__text"));
             String market = coinName.getText().substring(coinName.getText().indexOf("(") + 1, coinName.getText().indexOf(")")).trim();
@@ -71,7 +72,7 @@ public class Upbit {
 
             //코인전날 종가 api로 받기
             saveDto.setPrevClosingPrice(upbitApi(market));
-            Thread.sleep(5000);
+            Thread.sleep(15000);
 
             //연 추정 보상률, 스테이킹/언스테이킹 대기, 보상주기
             List<WebElement> values = webDriver.findElements(By.className("infoItem__value"));
@@ -104,14 +105,14 @@ public class Upbit {
             }
             //거래소 저장
             saveDto.setCoinMarketType(CoinMarketType.upbit);
-            //stakingInfoRepository.save(new StakingInfo(saveDto));
+            stakingInfoRepository.save(new StakingInfo(saveDto));
             System.out.println("saveDto :::::" + saveDto);
 
-            Thread.sleep(3000);
+            Thread.sleep(8000);
 
             //스테이킹 목록으로 다시들어가기
             webDriver.get(url);
-            Thread.sleep(3000);
+            Thread.sleep(8000);
         }
         //웹브라우저 닫기
         webDriver.close();
