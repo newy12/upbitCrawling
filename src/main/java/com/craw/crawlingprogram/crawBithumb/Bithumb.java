@@ -26,34 +26,12 @@ public class Bithumb {
 
     private final StakingInfoRepository stakingInfoRepository;
 
-    public static String BithumbApi(int i) {
-        //이더리움
-        String eth = "ETH_KRW";
-        //폴리곤
-        String matic = "MATIC_KRW";
-        //클레이튼
-        String klay = "KLAY_KRW";
-        //쎄타퓨엘
-        String tfuel = "TFUEL_KRW";
-        //퀀텀
-        String qtum = "QTUM_KRW";
-        //에이다
-        String ada = "ADA_KRW";
-        String sol = "SOL_KRW";
-        String dot = "DOT_KRW";
-        String waxp = "WAXP_KRW";
-        String eos = "EOS_KRW";
-        String cro = "CRO_KRW";
-        String orbs = "ORBS_KRW";
-        String icx = "ICX_KRW";
-        String iost = "IOST_KRW";
+    public static String BithumbApi(String market) {
 
-        String[] markets = {eth,matic,klay,tfuel,qtum,ada,sol,dot,waxp,eos,cro,orbs,icx,iost};
         //upbit api 요청으로 전일종가 추출
-
         RestTemplate restTemplate = new RestTemplate();
 
-        BithumbResponseDto response = restTemplate.getForObject("https://api.bithumb.com/public/ticker/"+markets[i], BithumbResponseDto.class);
+        BithumbResponseDto response = restTemplate.getForObject("https://api.bithumb.com/public/ticker/"+market + "_KRW", BithumbResponseDto.class);
         System.out.println("response = " + response);
         return response.getData().getClosing_price();
     }
@@ -87,15 +65,16 @@ public class Bithumb {
 
 
         for (int i = 0; i < coinName.size(); i++) {
-            saveDto.setPrevClosingPrice(BithumbApi(i));
-            Thread.sleep(10000);
+            System.out.println("value = " + extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText()));
+            saveDto.setPrevClosingPrice(BithumbApi(extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText())));
+            Thread.sleep(3000);
             saveDto.setCoinName(coinName.get(i).getText());
             String[] values = extractNumbers(years.get(i).getText());
             saveDto.setMinAnnualRewardRate(values[0]);
             saveDto.setMaxAnnualRewardRate(values[1]);
             saveDto.setMinimumOrderQuantity(numbers.get(i).getText() + unit.get(i).getText());
             saveDto.setCoinMarketType(CoinMarketType.bithumb);
-            stakingInfoRepository.save(new StakingInfo(saveDto));
+            //stakingInfoRepository.save(new StakingInfo(saveDto));
             System.out.println("saveDto = " + saveDto);
         }
 
@@ -120,7 +99,18 @@ public class Bithumb {
 
         return extractedNumbers;
     }
+    private static String extractLetterAfterNumber(String input) {
+        // 정규표현식 패턴
+        String pattern = "(\\d*\\.?\\d+)([A-Za-z]+)";
 
+        // 정규표현식과 매칭
+        if (input.matches(pattern)) {
+            // 매칭된 부분 반환 (영어 부분)
+            return input.replaceAll(pattern, "$2");
+        } else {
+            return "매칭된 결과 없음";
+        }
+    }
 }
 
 
