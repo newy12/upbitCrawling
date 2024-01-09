@@ -58,16 +58,13 @@ public class Upbit {
         Thread.sleep(8000);
 
         List<WebElement> addTexts = webDriver.findElements(By.className("css-1j71w0l"));
-        System.out.println("addTexts.size() = " + addTexts.size());
         for (int i =0; i<addTexts.size(); i++) {
             List<WebElement> addTextList = webDriver.findElements(By.className("css-1j71w0l"));
-            System.out.println("addTextList = " + addTextList.size());
             addTextList.get(i).click();
             Thread.sleep(8000);
             //코인이름
             WebElement coinName = webDriver.findElement(By.className("ListDetailView__condition__title__text"));
             String market = coinName.getText().substring(coinName.getText().indexOf("(") + 1, coinName.getText().indexOf(")")).trim();
-            System.out.println("market = " + market);
             saveDto.setCoinName(removeNonKorean(coinName.getText()));
 
             //코인전날 종가 api로 받기

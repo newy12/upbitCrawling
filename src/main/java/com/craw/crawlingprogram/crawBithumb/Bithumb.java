@@ -67,8 +67,8 @@ public class Bithumb {
 
 
         for (int i = 0; i < coinName.size(); i++) {
-            System.out.println("value = " + extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText()));
-            saveDto.setPrevClosingPrice(BithumbApi(extractLetterAfterNumber(numbers.get(i).getText() + unit.get(i).getText())));
+            System.out.println("value = " + unit.get(i).getText());
+            saveDto.setPrevClosingPrice(BithumbApi(unit.get(i).getText()));
             Thread.sleep(8000);
             saveDto.setCoinName(coinName.get(i).getText());
             String[] values = extractNumbers(years.get(i).getText());
@@ -108,6 +108,7 @@ public class Bithumb {
         // 정규표현식과 매칭
         if (input.matches(pattern)) {
             // 매칭된 부분 반환 (영어 부분)
+            System.out.println("input.replaceAll(pattern, \"$2\") = " + input.replaceAll(pattern, "$2"));
             return input.replaceAll(pattern, "$2");
         } else {
             return "매칭된 결과 없음";

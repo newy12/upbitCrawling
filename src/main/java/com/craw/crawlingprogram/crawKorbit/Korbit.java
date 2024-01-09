@@ -58,11 +58,9 @@ public class Korbit {
         Thread.sleep(8000);
 
         List<WebElement> clicks = webDriver.findElements(By.className("gaBYEM"));
-        System.out.println("clicks.size() = " + clicks.size());
         for (int i = 0; i < clicks.size(); i++) {
             List<WebElement> h3Element = webDriver.findElements(By.cssSelector(".sc-1z0oddf-0.ffIHDz h3"));
             String market = h3Element.get(i).getText().substring(h3Element.get(i).getText().indexOf("(") + 1, h3Element.get(i).getText().indexOf(")")).trim();
-            System.out.println("market = " + market);
             List<WebElement> clickList = webDriver.findElements(By.className("gaBYEM"));
             clickList.get(i).click();
             Thread.sleep(8000);
